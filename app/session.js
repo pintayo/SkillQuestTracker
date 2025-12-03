@@ -1,8 +1,9 @@
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert, ScrollView } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useState, useEffect } from 'react';
 import { loadSkills, logSession } from '../utils/storage';
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function SessionScreen() {
   const router = useRouter();
@@ -84,8 +85,14 @@ export default function SessionScreen() {
 
   if (!skill) {
     return (
-      <View style={styles.container}>
-        <StatusBar style="dark" />
+      <View style={styles.loadingContainer}>
+        <StatusBar style="light" />
+        <LinearGradient
+          colors={['#667eea', '#764ba2']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={StyleSheet.absoluteFill}
+        />
         <Text style={styles.loadingText}>Loading...</Text>
       </View>
     );
@@ -93,44 +100,96 @@ export default function SessionScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar style="dark" />
+      <StatusBar style="light" />
 
-      <View style={styles.content}>
-        {/* Skill Display */}
-        <View style={styles.skillHeader}>
-          <Text style={styles.skillIcon}>{skill.icon}</Text>
-          <Text style={styles.skillName}>{skill.name}</Text>
-          <Text style={styles.skillSubtitle}>Training Session</Text>
+      {/* Gradient Header */}
+      <LinearGradient
+        colors={['#667eea', '#764ba2']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.header}
+      >
+        <View style={styles.iconCircle}>
+          <LinearGradient
+            colors={['#f093fb', '#f5576c']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.iconGradient}
+          >
+            <Text style={styles.skillIcon}>{skill.icon}</Text>
+          </LinearGradient>
         </View>
+        <Text style={styles.skillName}>{skill.name}</Text>
+        <Text style={styles.skillSubtitle}>Training Session</Text>
+      </LinearGradient>
 
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {/* Timer Display */}
-        <View style={styles.timerContainer}>
-          <Text style={styles.timerText}>{formatTime(seconds)}</Text>
-          <Text style={styles.timerLabel}>
-            {isRunning ? 'Training...' : 'Ready to start'}
-          </Text>
+        <View style={styles.timerCard}>
+          <View style={styles.timerCircle}>
+            <LinearGradient
+              colors={isRunning ? ['#667eea', '#764ba2'] : ['#e0e0e0', '#c4c4c4']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.timerGradient}
+            >
+              <View style={styles.timerInner}>
+                <Text style={styles.timerText}>{formatTime(seconds)}</Text>
+                <Text style={styles.timerLabel}>
+                  {isRunning ? '⏱️ Training' : seconds > 0 ? 'Paused' : 'Ready'}
+                </Text>
+              </View>
+            </LinearGradient>
+          </View>
+
+          {/* Control Buttons */}
+          <View style={styles.controlRow}>
+            <TouchableOpacity
+              style={styles.controlButton}
+              onPress={handleStartStop}
+              activeOpacity={0.9}
+            >
+              <LinearGradient
+                colors={isRunning ? ['#f093fb', '#f5576c'] : ['#667eea', '#764ba2']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.controlButtonGradient}
+              >
+                <Text style={styles.controlButtonText}>
+                  {isRunning ? '⏸ PAUSE' : seconds > 0 ? '▶ RESUME' : '▶ START'}
+                </Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
         </View>
 
-        {/* Start/Stop Button */}
-        <TouchableOpacity
-          style={[styles.controlButton, isRunning && styles.stopButton]}
-          onPress={handleStartStop}
-        >
-          <Text style={styles.controlButtonText}>
-            {isRunning ? 'PAUSE' : seconds > 0 ? 'RESUME' : 'START'}
-          </Text>
-        </TouchableOpacity>
+        {/* Stats Cards */}
+        <View style={styles.statsGrid}>
+          <View style={styles.statCard}>
+            <Text style={styles.statValue}>{skill.currentHours.toFixed(1)}h</Text>
+            <Text style={styles.statLabel}>Total</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Text style={styles.statValue}>{skill.targetHours}h</Text>
+            <Text style={styles.statLabel}>Goal</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Text style={styles.statValue}>{skill.sessions.length}</Text>
+            <Text style={styles.statLabel}>Sessions</Text>
+          </View>
+        </View>
 
         {/* Notes Input */}
-        <View style={styles.notesContainer}>
-          <Text style={styles.notesLabel}>Session Notes (Optional)</Text>
+        <View style={styles.notesCard}>
+          <Text style={styles.notesTitle}>📝 Session Notes</Text>
           <TextInput
             style={styles.notesInput}
-            placeholder="How did it go? Any progress?"
+            placeholder="How did it go? Any breakthroughs?"
+            placeholderTextColor="#999"
             value={notes}
             onChangeText={setNotes}
             multiline
-            numberOfLines={3}
+            numberOfLines={4}
           />
         </View>
 
@@ -139,27 +198,22 @@ export default function SessionScreen() {
           <TouchableOpacity
             style={styles.completeButton}
             onPress={handleComplete}
+            activeOpacity={0.9}
           >
-            <Text style={styles.completeButtonText}>✓ COMPLETE SESSION</Text>
+            <LinearGradient
+              colors={['#52c234', '#4caf50']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.completeButtonGradient}
+            >
+              <Text style={styles.completeButtonText}>✓ COMPLETE SESSION</Text>
+              <Text style={styles.completeButtonSubtext}>
+                {Math.floor(seconds / 60)} minutes logged
+              </Text>
+            </LinearGradient>
           </TouchableOpacity>
         )}
-
-        {/* Quick Stats */}
-        <View style={styles.quickStats}>
-          <View style={styles.statItem}>
-            <Text style={styles.statItemValue}>{skill.currentHours.toFixed(1)}h</Text>
-            <Text style={styles.statItemLabel}>Current Progress</Text>
-          </View>
-          <View style={styles.statItem}>
-            <Text style={styles.statItemValue}>{skill.targetHours}h</Text>
-            <Text style={styles.statItemLabel}>Target</Text>
-          </View>
-          <View style={styles.statItem}>
-            <Text style={styles.statItemValue}>{skill.sessions.length}</Text>
-            <Text style={styles.statItemLabel}>Sessions</Text>
-          </View>
-        </View>
-      </View>
+      </ScrollView>
     </View>
   );
 }
@@ -167,123 +221,205 @@ export default function SessionScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#f8f9fa',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   loadingText: {
-    fontSize: 18,
-    textAlign: 'center',
-    marginTop: 100,
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#fff',
   },
-  content: {
-    flex: 1,
-    padding: 20,
-  },
-  skillHeader: {
+  header: {
+    paddingTop: 60,
+    paddingBottom: 40,
+    paddingHorizontal: 24,
     alignItems: 'center',
-    marginTop: 20,
-    marginBottom: 40,
+  },
+  iconCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    marginBottom: 16,
+    shadowColor: '#f093fb',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  iconGradient: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   skillIcon: {
-    fontSize: 72,
-    marginBottom: 15,
+    fontSize: 40,
   },
   skillName: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#2c3e50',
-    marginBottom: 5,
+    color: '#fff',
+    marginBottom: 4,
   },
   skillSubtitle: {
-    fontSize: 14,
-    color: '#7f8c8d',
+    fontSize: 16,
+    color: 'rgba(255,255,255,0.9)',
+    fontWeight: '500',
   },
-  timerContainer: {
-    alignItems: 'center',
-    marginBottom: 40,
+  content: {
+    padding: 20,
+    paddingBottom: 40,
+  },
+  timerCard: {
     backgroundColor: '#fff',
-    padding: 30,
-    borderRadius: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
+    borderRadius: 24,
+    padding: 32,
+    marginBottom: 20,
+    alignItems: 'center',
+    shadowColor: '#667eea',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  timerCircle: {
+    width: 220,
+    height: 220,
+    borderRadius: 110,
+    marginBottom: 32,
+  },
+  timerGradient: {
+    width: 220,
+    height: 220,
+    borderRadius: 110,
+    padding: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  timerInner: {
+    width: 204,
+    height: 204,
+    borderRadius: 102,
+    backgroundColor: '#fff',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   timerText: {
-    fontSize: 64,
+    fontSize: 48,
     fontWeight: 'bold',
-    color: '#2c3e50',
+    color: '#1a1a2e',
     fontVariant: ['tabular-nums'],
+    marginBottom: 8,
   },
   timerLabel: {
     fontSize: 16,
-    color: '#7f8c8d',
-    marginTop: 10,
+    color: '#6c757d',
+    fontWeight: '600',
+  },
+  controlRow: {
+    width: '100%',
   },
   controlButton: {
-    backgroundColor: '#27ae60',
-    paddingVertical: 20,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginBottom: 20,
+    borderRadius: 16,
+    overflow: 'hidden',
+    shadowColor: '#667eea',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
   },
-  stopButton: {
-    backgroundColor: '#e67e22',
+  controlButtonGradient: {
+    paddingVertical: 18,
+    alignItems: 'center',
   },
   controlButtonText: {
     color: '#fff',
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
-    letterSpacing: 1,
+    letterSpacing: 0.5,
   },
-  notesContainer: {
+  statsGrid: {
+    flexDirection: 'row',
+    gap: 12,
     marginBottom: 20,
   },
-  notesLabel: {
-    fontSize: 14,
+  statCard: {
+    flex: 1,
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 20,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  statValue: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#1a1a2e',
+    marginBottom: 4,
+  },
+  statLabel: {
+    fontSize: 12,
+    color: '#6c757d',
     fontWeight: '600',
-    color: '#7f8c8d',
-    marginBottom: 8,
+    textTransform: 'uppercase',
+  },
+  notesCard: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  notesTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#1a1a2e',
+    marginBottom: 12,
   },
   notesInput: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 15,
-    fontSize: 16,
-    minHeight: 80,
+    fontSize: 15,
+    color: '#1a1a2e',
+    minHeight: 100,
     textAlignVertical: 'top',
+    padding: 0,
   },
   completeButton: {
-    backgroundColor: '#3498db',
-    paddingVertical: 18,
-    borderRadius: 12,
+    borderRadius: 16,
+    overflow: 'hidden',
+    shadowColor: '#52c234',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  completeButtonGradient: {
+    paddingVertical: 20,
+    paddingHorizontal: 24,
     alignItems: 'center',
-    marginBottom: 20,
   },
   completeButtonText: {
     color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
-    letterSpacing: 1,
+    letterSpacing: 0.5,
+    marginBottom: 4,
   },
-  quickStats: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 20,
-  },
-  statItem: {
-    alignItems: 'center',
-  },
-  statItemValue: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#2c3e50',
-  },
-  statItemLabel: {
-    fontSize: 12,
-    color: '#7f8c8d',
-    marginTop: 5,
+  completeButtonSubtext: {
+    color: 'rgba(255,255,255,0.9)',
+    fontSize: 14,
+    fontWeight: '500',
   },
 });
