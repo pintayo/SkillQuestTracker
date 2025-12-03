@@ -10,19 +10,34 @@ export default function HomeScreen() {
   const [recommendedSkill, setRecommendedSkill] = useState(null);
   const [lastSkill, setLastSkill] = useState(null);
   const [stats, setStats] = useState({ totalHours: 0, unlockedSkills: 0 });
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const loadData = async () => {
-    const recommended = await getNextRecommendedSkill();
-    const last = await getLastTrainedSkill();
-    const skills = await loadSkills();
+    try {
+      setIsLoading(true);
+      setError(null);
 
-    setRecommendedSkill(recommended);
-    setLastSkill(last);
+      const recommended = await getNextRecommendedSkill();
+      const last = await getLastTrainedSkill();
+      const skills = await loadSkills();
 
-    if (skills) {
-      const totalHours = skills.reduce((sum, s) => sum + s.currentHours, 0);
-      const unlocked = skills.filter(s => !s.locked).length;
-      setStats({ totalHours: totalHours.toFixed(1), unlockedSkills: unlocked });
+      console.log('Loaded skills:', skills?.length || 0);
+      console.log('Recommended skill:', recommended?.name);
+
+      setRecommendedSkill(recommended);
+      setLastSkill(last);
+
+      if (skills) {
+        const totalHours = skills.reduce((sum, s) => sum + s.currentHours, 0);
+        const unlocked = skills.filter(s => !s.locked).length;
+        setStats({ totalHours: totalHours.toFixed(1), unlockedSkills: unlocked });
+      }
+    } catch (err) {
+      console.error('Error loading data:', err);
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -45,11 +60,24 @@ export default function HomeScreen() {
     router.push('/tree');
   };
 
-  if (!recommendedSkill) {
+  if (error) {
+    return (
+      <View style={styles.container}>
+        <StatusBar style="dark" />
+        <Text style={styles.errorText}>Error: {error}</Text>
+        <TouchableOpacity style={styles.retryButton} onPress={loadData}>
+          <Text style={styles.retryButtonText}>Retry</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  if (isLoading || !recommendedSkill) {
     return (
       <View style={styles.container}>
         <StatusBar style="dark" />
         <Text style={styles.loadingText}>Loading...</Text>
+        <Text style={styles.loadingSubtext}>Initializing your skills...</Text>
       </View>
     );
   }
@@ -152,6 +180,33 @@ const styles = StyleSheet.create({
     fontSize: 18,
     textAlign: 'center',
     marginTop: 100,
+    color: '#2c3e50',
+  },
+  loadingSubtext: {
+    fontSize: 14,
+    textAlign: 'center',
+    marginTop: 10,
+    color: '#7f8c8d',
+  },
+  errorText: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginTop: 100,
+    color: '#e74c3c',
+    paddingHorizontal: 20,
+  },
+  retryButton: {
+    backgroundColor: '#3498db',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    marginTop: 20,
+    alignSelf: 'center',
+  },
+  retryButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
   },
   header: {
     backgroundColor: '#2c3e50',
