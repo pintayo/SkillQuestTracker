@@ -131,14 +131,24 @@ function calculateOptimalPath(skills) {
 
 ```
 SkillQuestTracker/
+├── app/                            # React Native app screens
+│   ├── _layout.js                 # Navigation setup
+│   ├── index.js                   # Home screen
+│   ├── session.js                 # Timer screen
+│   └── tree.js                    # Skill tree visualization
 ├── src/
 │   ├── algorithm/
 │   │   ├── skillPrioritizer.js    # Core algorithm
 │   │   └── testRunner.js          # Test with your skills
-│   ├── data/
-│   │   └── skillDatabase.js       # 15 skills with transfer matrix
-│   └── app/                        # React Native app (TODO)
+│   └── data/
+│       └── skillDatabase.js       # 15 skills with transfer matrix
+├── data/
+│   └── userSkills.js              # User's skill configuration
+├── utils/
+│   └── storage.js                 # AsyncStorage utilities
+├── app.json                       # Expo config
 ├── package.json
+├── APP_GUIDE.md                   # Instagram content guide
 └── README.md
 ```
 
@@ -165,25 +175,50 @@ This will show you:
 - **Total Hours:** 670 hours
 - **Timeline:** ~17 months at 10hrs/week
 
-## 🎮 Next Steps
+## 🚀 Getting Started
 
-### Week 1: Build MVP App
-- [ ] "What Should I Do Now?" screen
-- [ ] Timer and session logger
-- [ ] Progress tracking
-- [ ] Phase 1 only (3 skills)
+### Installation
 
-### Week 2: Full Feature Set
-- [ ] Complete onboarding flow
-- [ ] Skill library with all 15 skills
-- [ ] Unlock system
-- [ ] Progress dashboard
+1. **Install dependencies:**
+```bash
+npm install
+```
 
-### Week 3: Polish
-- [ ] Push notifications
-- [ ] Local venue integration
-- [ ] Achievement badges
-- [ ] Supabase sync
+2. **Start the app:**
+```bash
+npm start
+```
+
+3. **Run on device:**
+- Scan QR code with Expo Go app (iOS/Android)
+- Or press `i` for iOS simulator, `a` for Android emulator
+
+### Testing Algorithm
+
+Run the smart prioritization algorithm:
+```bash
+npm run test-algorithm
+```
+
+## 📱 App Features
+
+### ✅ Implemented Features
+
+- **Home Screen**: Shows today's quest with "START NOW" button
+- **Session Timer**: Track practice time with notes
+- **Skill Tree**: Visual progress tree with unlock system
+- **Progress Tracking**: Hours logged, progress percentages
+- **Auto-Unlock**: Skills unlock when prerequisites complete
+- **Local Storage**: All data saved locally
+
+### 🔜 Future Features
+
+- Push notifications for daily reminders
+- Supabase cloud sync
+- Achievement system
+- Venue integration (SnowWorld, etc.)
+- Social sharing
+- Calendar integration
 
 ## 💭 Design Philosophy
 
@@ -202,6 +237,25 @@ You'll know the app works when:
 - ✅ Skills unlock as you complete foundations
 - ✅ You actually DO the activities instead of planning them
 
+## 📸 Instagram Content Strategy
+
+See [APP_GUIDE.md](./APP_GUIDE.md) for:
+- Video script templates
+- Screenshot timing tips
+- Content posting schedule
+- Week-by-week strategy
+- Caption ideas
+
+**Perfect for:** "Day X Learning [Skill]" Instagram series!
+
 ---
+
+## 🎬 Quick Start for Instagram
+
+1. Buy skateboard (€100)
+2. Record first session
+3. Open app and log session
+4. Screenshot progress
+5. Post "Day 1 of becoming a jack of all trades"
 
 **Built to solve decision paralysis through algorithmic prioritization** 🚀
